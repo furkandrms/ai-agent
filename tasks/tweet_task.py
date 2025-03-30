@@ -10,7 +10,7 @@ load_dotenv()
 
 class TweetTask(BaseTask):
 
-    def execute(self, personality):
+    def execute(self, personality, config=None):
         
         prompt_template = PromptTemplate.from_template(
             "Write a {style}, {tone} tweet about {topic}. Keep it under 280 characters. Be authentic and engaging."
@@ -27,5 +27,9 @@ class TweetTask(BaseTask):
         }).content
 
         print(f"[TWEET] Generated Tweet: \n{tweet}\n")
-        post_tweet(tweet)
-        print("[TWEET] Tweet posted successfully.")
+        if config and "twitter_credentials" in config:
+            post_tweet(tweet, config["twitter_credentials"])
+            print("[TWEET] Tweet posted successfully.")
+        else:
+            print("[WARNING] No Twitter credentials found. Tweet not posted.")
+
