@@ -6,7 +6,15 @@ from tasks.reply_task import ReplyTask
 import os 
 from dotenv import load_dotenv
 
+from scheduler import start_scheduler
+
 load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
+if openai_api_key is None:
+    raise ValueError("OPENAI_API_KEY is not set in .env file")
+else: 
+    print("[INFO] OpenAI API Key found")
 
 def task_factory(task_config): 
     if task_config["type"] == "tweet": 
@@ -16,11 +24,18 @@ def task_factory(task_config):
     else: 
         raise ValueError("Invalid task type")
 
-def create_agent_from_config(config): 
+def create_agent_from_config(config):
     tasks = [task_factory(t) for t in config["tasks"]]
     return Agent(config["name"], config["personality"], tasks)
+
+
+def run_agent_from_file(path): 
+    config = load_agent_config(path)
+    agent = create_agent_from_config(config)
+    start_scheduler(agent)
 
 if __name__ == "__main__": 
     config = load_agent_config("configs/zen_bot.json")
     agent = create_agent_from_config(config)
+    start_scheduler(agent)
     agent.run()
