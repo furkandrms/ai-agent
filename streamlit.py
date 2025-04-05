@@ -12,13 +12,13 @@ from utils.log_buffer import StreamlitLogger
 from auth.twitter_auth import get_auth_url
 
 CONFIG_DIR = "configs"
-LOG_UPDATE_INTERVAL = 1  # saniye
+LOG_UPDATE_INTERVAL = 1  # seconds
 
-# Sayfa ayarları
+# Page settings
 st.set_page_config(page_title="Twitter AI Agent Studio", layout="centered")
 st.title("🤖 Twitter AI Agent Studio")
 
-# Session state üzerinden Controller ve Logger'ı al
+# Session state controller and logger
 if "controller" not in st.session_state:
     st.session_state.controller = AgentController()
 
@@ -28,24 +28,24 @@ if "logger" not in st.session_state:
 controller = st.session_state.controller
 logger = st.session_state.logger
 
-# --------------------- AGENT OLUŞTUR ---------------------
-st.header("➕ Yeni Agent Oluştur")
+# --------------------- CREATE AGENT ---------------------
+st.header("➕ Create New Agent")
 
 with st.form("agent_form"):
-    name = st.text_input("Agent İsmi", value=f"agent_{str(uuid.uuid4())[:5]}")
-    tone = st.selectbox("Tweet Tonu", ["calm", "motivational", "funny", "professional"])
-    topic = st.text_input("Tweet Konusu", "mindfulness")
-    style = st.selectbox("Tweet Stili", ["formal", "casual", "informative", "engaging"])
+    name = st.text_input("Agent Name", value=f"agent_{str(uuid.uuid4())[:5]}")
+    tone = st.selectbox("Tweet Tone", ["calm", "motivational", "funny", "professional"])
+    topic = st.text_input("Tweet Topic", "mindfulness")
+    style = st.selectbox("Tweet Style", ["formal", "casual", "informative", "engaging"])
 
-    st.markdown("### Görevler")
-    tweet_task = st.checkbox("Tweet Görevi Ekle", value=True)
-    reply_task = st.checkbox("Reply Görevi Ekle", value=True)
+    st.markdown("### Tasks")
+    tweet_task = st.checkbox("Add Tweet Task", value=True)
+    reply_task = st.checkbox("Add Reply Task", value=True)
     keywords = []
 
     if reply_task:
-        keywords = st.text_input("Anahtar Kelimeler (Virgülle Ayırın)", "meditation, mindfulness, zen").split(",")
+        keywords = st.text_input("Keywords (comma-separated)", "meditation, mindfulness, zen").split(",")
 
-    submitted = st.form_submit_button("✅ Agent Oluştur")
+    submitted = st.form_submit_button("✅ Create Agent")
 
 if submitted:
     agent_config = {
@@ -75,35 +75,34 @@ if submitted:
     with open(config_path, "w") as f:
         json.dump(agent_config, f)
 
-    st.success(f"✅ Agent oluşturuldu: {name}")
-    with st.expander("📄 Agent Konfigürasyonu"):
+    st.success(f"✅ Agent created: {name}")
+    with st.expander("📄 Agent Configuration"):
         st.code(json.dumps(agent_config, indent=2))
 
-    # ✅ Agent oluşturulduktan sonra: session'a kaydet
+    # Save to session
     st.session_state["last_created_agent"] = name
     st.session_state["oauth_session"] = str(uuid.uuid4())[:8]
 
-    # ✅ Twitter bağlantısını hemen göster
-    st.markdown("### 🔑 Twitter Hesabını Bağla")
+    # Twitter auth link
+    st.markdown("### 🔑 Connect Twitter Account")
     config_filename = os.path.join(CONFIG_DIR, f"{name}.json")
     url = get_auth_url(config_path)
-    print(f"[INFO] Twitter yetkilendirme bağlantısı: {url}")
+    print(f"[INFO] Twitter authorization URL: {url}")
     if url:
-        st.success("Twitter yetkilendirme bağlantısı oluşturuldu.")
-        st.markdown(f"[👉 Twitter'a Git ve Yetki Ver]({url})")
-        st.markdown("Yetki verdikten sonra access token otomatik olarak bu agent'a kaydedilecektir.")
+        st.success("Twitter authorization link created.")
+        st.markdown(f"[👉 Go to Twitter and Authorize]({url})")
+        st.markdown("After authorization, access token will be automatically saved for this agent.")
     else:
-        st.error("Yetkilendirme bağlantısı alınamadı.")
+        st.error("Failed to generate authorization link.")
 
-
-# --------------------- AGENT ÇALIŞTIR ---------------------
+# --------------------- RUN / STOP AGENT ---------------------
 st.markdown("---")
-st.header("🚀 Agent'ı Başlat / Durdur")
+st.header("🚀 Start / Stop Agent")
 
 configs = [f for f in os.listdir(CONFIG_DIR) if f.endswith(".json")]
 
 if configs:
-    selected_config = st.selectbox("Agent Seç:", configs)
+    selected_config = st.selectbox("Select Agent:", configs)
     name = selected_config.replace(".json", "")
     path = os.path.join(CONFIG_DIR, selected_config)
 
@@ -111,12 +110,12 @@ if configs:
 
     with col1:
         if controller.is_running(name):
-            if st.button("🛑 Agent'ı Durdur"):
+            if st.button("🛑 Stop Agent"):
                 controller.stop_agent(name)
-                st.warning(f"🛑 {name} agent durduruldu.")
+                st.warning(f"🛑 Agent {name} has been stopped.")
         else:
-            if st.button("▶️ Agent'ı Başlat"):
-                sys.stdout = logger  # stdout'u log'a yönlendir
+            if st.button("▶️ Start Agent"):
+                sys.stdout = logger  # Redirect stdout to logger
 
                 def run():
                     run_agent_from_file(path)
@@ -124,20 +123,20 @@ if configs:
                 thread = threading.Thread(target=run, daemon=True)
                 thread.start()
                 controller.start_agent(name, path)
-                st.success(f"✅ {name} agent başlatıldı.")
+                st.success(f"✅ Agent {name} has started.")
 
     with col2:
-        st.markdown("### ⏱ Durum")
-        status = "🟢 Çalışıyor" if controller.is_running(name) else "🔴 Durmuyor"
+        st.markdown("### ⏱ Status")
+        status = "🟢 Running" if controller.is_running(name) else "🔴 Stopped"
         st.write(status)
 
-    st.markdown("### 📜 Loglar")
+    st.markdown("### 📜 Logs")
     log_placeholder = st.empty()
 
     if controller.is_running(name):
-        for _ in range(100):  # canlı log takibi
+        for _ in range(100):  # live log tracking
             logs = logger.get_value()
             log_placeholder.code(logs, language="text")
             time.sleep(LOG_UPDATE_INTERVAL)
 else:
-    st.warning("Henüz agent oluşturulmadı.")
+    st.warning("No agent has been created yet.")

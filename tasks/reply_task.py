@@ -10,7 +10,7 @@ load_dotenv()
 
 class ReplyTask(BaseTask):
 
-    def execute(self, personality):
+    def execute(self, personality, config=None):
         credentials = self.config.get("twitter_credentials")
 
         if not credentials:
@@ -38,5 +38,5 @@ class ReplyTask(BaseTask):
                     "tweet": text
                 }).content
 
-                reply_to_tweet(tweet["id"], response)
+                reply_to_tweet(tweet["id"], response, username=tweet["username"])
                 print(f"[REPLY] Replied to tweet: {text}")

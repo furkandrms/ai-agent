@@ -169,3 +169,13 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Agent Settings
+configs/
+oauth_token_map.json
+
+# Log Transactions File 
+twitter_log.json
+
+# .DS_Store
+.DS_Store
