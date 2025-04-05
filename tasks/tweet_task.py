@@ -31,5 +31,6 @@ class TweetTask(BaseTask):
             post_tweet(tweet, config["twitter_credentials"])
             print("[TWEET] Tweet posted successfully.")
         else:
+            print(f"[ERROR] Twitter credentials not found: {config}")
             print("[WARNING] No Twitter credentials found. Tweet not posted.")
 

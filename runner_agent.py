@@ -32,6 +32,7 @@ def create_agent_from_config(config):
 def run_agent_from_file(path): 
     config = load_agent_config(path)
     agent = create_agent_from_config(config)
+    agent.run(config)
     start_scheduler(agent)
 
 if __name__ == "__main__": 

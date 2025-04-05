@@ -11,8 +11,13 @@ load_dotenv()
 class ReplyTask(BaseTask):
 
     def execute(self, personality):
+        credentials = self.config.get("twitter_credentials")
+
+        if not credentials:
+            print("[ERROR] Twitter credentials not found in config.")
+            return
         keywords = self.config.get("keywords", [])
-        mentions = get_recent_mentions()
+        mentions = get_recent_mentions(credentials)
 
         for tweet in mentions: 
             text = tweet["text"]
