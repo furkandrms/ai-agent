@@ -10,7 +10,7 @@ LOG_FILE = "twitter_log.json"
 
 API_KEY = os.getenv("TWITTER_API_KEY")
 API_SECRET = os.getenv("TWITTER_API_SECRET")
-BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
+BEARER_TOKEN = os.getenv("BEARER_TOKEN")
 
 
 def get_user_client(access_token, access_token_secret):
@@ -66,11 +66,11 @@ def post_tweet(tweet, credentials):
         print(f"[ERROR] Failed to post tweet: {e}")
 
 
+
 def get_recent_mentions(credentials, user_id=None, limit=5):
     try:
         client = get_user_client(credentials["access_token"], credentials["access_secret"])
 
-        # Eğer user_id yoksa, kullanıcıyı çek
         if not user_id:
             user_response = client.get_me()
             user_id = user_response.data.id
@@ -92,24 +92,46 @@ def get_recent_mentions(credentials, user_id=None, limit=5):
         return []
 
 
-def reply_to_tweet(tweet_id, reply_text, credentials):
-    if is_duplicate(reply_text):
-        print("[SKIP] Reply is skipped because it has similar content.")
-        return
+def reply_to_tweet(tweet_id, reply_text, credentials, username=None):
+    full_text = f"@{username} {reply_text}" if username else reply_text
 
     try:
         client = get_user_client(credentials["access_token"], credentials["access_secret"])
         response = client.create_tweet(
-            text=reply_text,
+            text=full_text,
             in_reply_to_tweet_id=tweet_id
         )
-
-        print(f"[REAL] Replied to tweet {tweet_id} with: {reply_text}")
-        log_tweet(reply_text, response.data.get("id"), "reply", related_to=tweet_id)
+        print(f"[REAL] Replied to tweet {tweet_id} with: {full_text}")
+        log_tweet(full_text, response.data.get("id"), "reply", related_to=tweet_id)
 
     except Exception as e:
         print(f"[ERROR] Failed to reply: {e}")
 
+def like_tweet(tweet_id, credentials):
+    try: 
+        client = get_user_client(credentials["access_token"], credentials["access_secret"])
+        response = client.like(tweet_id)
+        print(f"[REAL] Liked tweet {response.data.get('id')}")
+        log_tweet(tweet_id, tweet_id, "like", related_to=tweet_id)
+    except Exception as e:
+        print(f"[ERROR] Failed to like tweet: {e}")
+
+def retweet(tweet_id, credentials): 
+    try: 
+        client = get_user_client(credentials["access_token"], credentials["access_secret"])
+        response = client.retweet(tweet_id)
+        print(f"[REAL] Retweeted tweet {response.data.get('id')}")
+        log_tweet(tweet_id, tweet_id, "retweet", related_to=tweet_id)
+    except Exception as e:
+        print(f"[ERROR] Failed to retweet: {e}")
+
+def follow_user(user_id, credentials):
+    try:
+        client = get_user_client(credentials["access_token"], credentials["access_secret"])
+        client.follow_user(target_user_id=user_id)
+        print(f"[FOLLOW] Kullanıcı {user_id} takip edildi.")
+    except Exception as e:
+        print(f"[ERROR] Failed to follow user {user_id}: {e}")
 
 def is_duplicate(text, threshold=0.9):
     try:

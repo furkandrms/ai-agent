@@ -40,7 +40,21 @@ with st.form("agent_form"):
     st.markdown("### Tasks")
     tweet_task = st.checkbox("Add Tweet Task", value=True)
     reply_task = st.checkbox("Add Reply Task", value=True)
+    engagement_task = st.checkbox("Add Engagement Task", value=True)
+    engagement_actions = []
+    engagement_keywords = []
     keywords = []
+
+    if engagement_task:
+        engagement_actions = st.multiselect(
+            "Engagement Actions",
+            ["like", "retweet", "follow"],
+            default=["like"]
+        )
+        engagement_keywords = st.text_input(
+            "Engagement Keywords (comma-separated)",
+            "meditation, mindfulness, zen"
+        ).split(",")
 
     if reply_task:
         keywords = st.text_input("Keywords (comma-separated)", "meditation, mindfulness, zen").split(",")
@@ -68,6 +82,14 @@ if submitted:
             "type": "reply",
             "frequency": "daily",
             "keywords": [kw.strip() for kw in keywords]
+        })
+    
+    if engagement_task:
+        agent_config["tasks"].append({
+            "type": "engagement",
+            "frequency": "daily",
+            "keywords": [kw.strip() for kw in keywords],
+            "actions": engagement_actions
         })
 
     os.makedirs(CONFIG_DIR, exist_ok=True)

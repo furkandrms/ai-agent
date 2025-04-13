@@ -11,7 +11,7 @@ load_dotenv()
 class ReplyTask(BaseTask):
 
     def execute(self, personality, config=None):
-        credentials = self.config.get("twitter_credentials")
+        credentials = config.get("twitter_credentials") if config else None
 
         if not credentials:
             print("[ERROR] Twitter credentials not found in config.")

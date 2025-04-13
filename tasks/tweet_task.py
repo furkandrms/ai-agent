@@ -11,6 +11,10 @@ load_dotenv()
 class TweetTask(BaseTask):
 
     def execute(self, personality, config=None):
+        credentials = config.get("twitter_credentials") if config else None
+        if not credentials:
+            print("[ERROR] Twitter credentials not found in config.")
+            return
         
         prompt_template = PromptTemplate.from_template(
             "Write a {style}, {tone} tweet about {topic}. Keep it under 280 characters. Be authentic and engaging."

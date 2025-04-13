@@ -5,7 +5,7 @@ class Agent:
         self.personality = personality
         self.tasks = tasks
 
-    def run(self, config=None): 
+    def run(self, config): 
         print("Running agent: " + self.name)
         for task in self.tasks: 
             task.execute(self.personality, config=config)
