@@ -41,4 +41,4 @@ def run_agent_from_file(path):
 if __name__ == "__main__": 
     config = load_agent_config("configs/zen_bot.json")
     agent = create_agent_from_config(config)
-    agent.run()
+    agent.run(config)

@@ -29,7 +29,7 @@ class EngagementTask(BaseTask):
             print("[ERROR] Failed to get user ID.")
             return
         
-        tweets = client.get_users_tweets(id=user_id, max_results=10)
+        tweets = client.get_users_tweets(id=user_id, max_results=5)
 
         if not tweets.data:
             print("[WARNING] No tweets found.")
