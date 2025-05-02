@@ -109,7 +109,6 @@ if submitted:
     st.markdown("### 🔑 Connect Twitter Account")
     config_filename = os.path.join(CONFIG_DIR, f"{name}.json")
     url = get_auth_url(config_path)
-    print(f"[INFO] Twitter authorization URL: {url}")
     if url:
         st.success("Twitter authorization link created.")
         st.markdown(f"[👉 Go to Twitter and Authorize]({url})")

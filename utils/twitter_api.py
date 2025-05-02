@@ -13,14 +13,14 @@ API_SECRET = os.getenv("TWITTER_API_SECRET")
 BEARER_TOKEN = os.getenv("BEARER_TOKEN")
 
 
-def get_user_client(access_token, access_token_secret):
+def get_user_client(twitter_access_token, twitter_access_token_secret):
 
     return tweepy.Client(
         bearer_token=BEARER_TOKEN,
         consumer_key=API_KEY,
         consumer_secret=API_SECRET,
-        access_token=access_token,
-        access_token_secret=access_token_secret
+        access_token=twitter_access_token,
+        access_token_secret=twitter_access_token_secret
     )
 
 

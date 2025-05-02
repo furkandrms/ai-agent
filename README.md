@@ -83,7 +83,7 @@ twitter_credentials:
 ### Launch the Streamlit interface
 
 ```bash
-streamlit run streamlit_app.py
+streamlit run streamlit.py
 ```
 
 - Create an agent  
@@ -108,7 +108,7 @@ streamlit run streamlit_app.py
 ```
 ├── agent.py
 ├── runner_agent.py
-├── streamlit_app.py
+├── streamlit.py
 ├── tasks/
 │   ├── tweet_task.py
 │   └── reply_task.py

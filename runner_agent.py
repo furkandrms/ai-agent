@@ -36,9 +36,10 @@ def run_agent_from_file(path):
     config = load_agent_config(path)
     agent = create_agent_from_config(config)
     agent.run(config)
-    start_scheduler(agent)
+    start_scheduler(agent, config)
 
 if __name__ == "__main__": 
     config = load_agent_config("configs/zen_bot.json")
     agent = create_agent_from_config(config)
     agent.run(config)
+    start_scheduler(agent, config)
